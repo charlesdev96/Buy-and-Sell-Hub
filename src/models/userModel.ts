@@ -1,0 +1,84 @@
+import {
+	Table,
+	Column,
+	Index,
+	Default,
+	DataType,
+	Model,
+	HasMany,
+	HasOne,
+	BeforeSave,
+} from "sequelize-typescript";
+
+import { nanoid } from "nanoid";
+
+export interface UserAttributes {
+	id?: String;
+	firstName?: String;
+	lastName?: String;
+	email?: String;
+	password?: String;
+	phoneNumber?: String;
+	verificationCode?: String | null;
+	verified?: Boolean;
+	role?: "admin" | "user";
+	gender?: String;
+	age?: String;
+	dob?: String;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
+
+@Table({ tableName: "users", timestamps: true })
+export class Users
+	extends Model<UserAttributes, UserAttributes>
+	implements UserAttributes
+{
+	@Default(DataType.UUIDV4)
+	@Index({ name: "custom_index_name", unique: true, using: "BTREE" })
+	@Column({ field: "id", primaryKey: true, type: DataType.UUID, unique: true })
+	id?: string;
+	@Column({ field: "firstName", allowNull: true, type: DataType.STRING(225) })
+	firstName?: String;
+	@Column({ field: "lastName", allowNull: true, type: DataType.STRING(225) })
+	lastName?: String;
+	@Column({ field: "password", allowNull: true, type: DataType.STRING(225) })
+	password?: String;
+	@Column({
+		field: "email",
+		allowNull: true,
+		unique: true,
+		type: DataType.STRING(225),
+	})
+	email?: String;
+	@Column({
+		field: "phoneNumber",
+		allowNull: true,
+		unique: true,
+		type: DataType.STRING(225),
+	})
+	phoneNumber?: String;
+	@Default(nanoid())
+	@Column({
+		field: "verificationCode",
+		allowNull: true,
+		type: DataType.STRING(),
+	})
+	verificationCode?: String | null;
+	@Default(false)
+	@Column({ field: "verified", allowNull: true, type: DataType.BOOLEAN })
+	verified?: Boolean | undefined;
+	@Default("user")
+	@Column({ field: "role", allowNull: true, type: DataType.STRING(225) })
+	role?: "admin" | "user";
+	@Column({ field: "gender", allowNull: true, type: DataType.STRING(225) })
+	gender?: String;
+	@Column({ field: "age", allowNull: true, type: DataType.STRING(225) })
+	age?: String;
+	@Column({ field: "dob", allowNull: true, type: DataType.STRING(225) })
+	dob?: String;
+	@Column({ field: "createdAt", allowNull: true, type: DataType.DATE })
+	createdAt?: Date;
+	@Column({ field: "updatedAt", allowNull: true, type: DataType.DATE })
+	updatedAt?: Date;
+}
