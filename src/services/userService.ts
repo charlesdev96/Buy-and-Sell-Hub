@@ -2,6 +2,7 @@ import { omit } from "lodash";
 import { UserAttributes, Users } from "../models";
 import { log } from "../utils";
 import bcrypt from "bcryptjs";
+import { nanoid } from "nanoid";
 
 export const resgisterUser = async (input: UserAttributes) => {
 	try {
@@ -20,12 +21,9 @@ export const resgisterUser = async (input: UserAttributes) => {
 	}
 };
 
-export const validatePassword = async (
-	userPassword: string,
-	password: string,
-): Promise<boolean> => {
-	const isPasswordValid: boolean = await bcrypt.compare(userPassword, password);
-	return isPasswordValid;
+export const hashPassword = async (password: string) => {
+	const hashedPassword = await bcrypt.hash(password, 10);
+	return hashedPassword;
 };
 
 export const findUserByPk = async (id: string) => {

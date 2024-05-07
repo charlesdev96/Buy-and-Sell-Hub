@@ -20,6 +20,7 @@ export const registerUserSchema = z.object({
 				required_error: "gender is required",
 			}),
 			verificationCode: z.string().optional(),
+			passwordResetCode: z.string().optional(),
 			dob: z
 				.string({
 					required_error: "gender is required",
@@ -52,6 +53,12 @@ export const verifyUserSchema = z.object({
 	}),
 });
 
+export const resendEmailSchema = z.object({
+	params: z.object({
+		id: z.string(),
+	}),
+});
+
 export const loginSchema = z.object({
 	body: z.object({
 		email: z
@@ -67,8 +74,46 @@ export const loginSchema = z.object({
 	}),
 });
 
+export const forgotPasswordSchema = z.object({
+	body: z.object({
+		email: z
+			.string({
+				required_error: "Email is required",
+			})
+			.email({ message: "Invalid email address" }),
+	}),
+});
+
+export const verifyresetPasswordSchema = z.object({
+	params: z.object({
+		id: z.string(),
+		passwordCode: z.string(),
+	}),
+	body: z
+		.object({
+			password: z
+				.string({
+					required_error: "Password is required",
+				})
+				.min(6, { message: "Password too short - should be 6 chars minimum" }),
+			passwordConfirmation: z.string({
+				required_error: "passwordConfirmation is required",
+			}),
+		})
+		.refine((data) => data.password === data.passwordConfirmation, {
+			message: "Passwords do not match",
+			path: ["passwordConfirmation"],
+		}),
+});
+
 export type registerUserInput = z.infer<typeof registerUserSchema>["body"];
 
 export type verifyUser = z.infer<typeof verifyUserSchema>["params"];
 
 export type loginInputs = z.infer<typeof loginSchema>["body"];
+
+export type resendEmailInputs = z.infer<typeof resendEmailSchema>["params"];
+
+export type forgotPasswordInputs = z.infer<typeof forgotPasswordSchema>["body"];
+
+export type resetPasswordInputs = z.infer<typeof verifyresetPasswordSchema>;

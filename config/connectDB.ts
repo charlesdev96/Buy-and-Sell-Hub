@@ -14,7 +14,10 @@ export const sequelize = new Sequelize({
 	password: process.env.DB_PASSWORD,
 	host: "localhost",
 	dialect: "mysql",
-	logging: true, // Disable logging SQL queries (optional)
+	logging: (sql, timing) => {
+		log.info(`Executing SQL: ${sql}`);
+		log.info(`Query timing: ${timing} ms`);
+	}, // Disable logging SQL queries (optional)
 });
 
 sequelize.addModels([Users]);
@@ -75,7 +78,7 @@ userCreatedEmitter.on("userCreated", async (user: Users) => {
 export const testConnection = async function (): Promise<void> {
 	try {
 		await sequelize
-			.sync({ force: false })
+			.sync({ force: false, alter: true })
 			.then(() => {
 				log.info("All models are successfully synced");
 			})

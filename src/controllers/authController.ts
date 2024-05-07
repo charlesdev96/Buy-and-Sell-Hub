@@ -1,12 +1,20 @@
 import { Request, Response } from "express";
-import { registerUserInput, verifyUser, loginInputs } from "../schema";
+import { nanoid } from "nanoid";
+import {
+	registerUserInput,
+	verifyUser,
+	loginInputs,
+	resendEmailInputs,
+	forgotPasswordInputs,
+	resetPasswordInputs,
+} from "../schema";
 import {
 	resgisterUser,
 	findUserByPk,
 	findUserByEmail,
 	findUserByPhone,
 	existingUser,
-	validatePassword,
+	hashPassword,
 } from "../services";
 import { createJWT, log, sendEmail } from "../utils";
 import { StatusCodes } from "http-status-codes";
@@ -61,9 +69,43 @@ export class UserAuthentication {
 				data: user,
 				token: token,
 			});
-		} catch (error) {
+		} catch (error: any) {
 			log.info(error);
 			log.info("Unable to create user");
+		}
+	}
+
+	public async resendVerificationEmail(
+		req: Request<resendEmailInputs, {}, {}>,
+		res: Response,
+	) {
+		try {
+			const id = req.params.id;
+			const user = await findUserByPk(id);
+			if (!user) {
+				return res
+					.status(StatusCodes.BAD_REQUEST)
+					.json({ message: "Sorry, can not re-send verification code" });
+			}
+			// check to see if they are already verified
+			if (user.verified) {
+				return res
+					.status(StatusCodes.OK)
+					.json({ message: "User is already verified" });
+			}
+			const email = user.email;
+			await sendEmail({
+				to: email?.toString(),
+				from: "test@example.com",
+				subject: "Verify your email/account",
+				text: `verification code: ${user.verificationCode} and your Id is: ${id}`,
+			});
+			res
+				.status(StatusCodes.OK)
+				.json({ message: "Verification email resent successfully" });
+		} catch (error: any) {
+			log.info(error);
+			log.info("Unable to resend email user");
 		}
 	}
 
@@ -119,7 +161,7 @@ export class UserAuthentication {
 		try {
 			const body = req.body as loginInputs;
 			const message = "Invalid email or password";
-			const user: Users | null = await findUserByEmail(body.email);
+			const user = await findUserByEmail(body.email);
 			if (!user) {
 				return res.status(StatusCodes.BAD_REQUEST).json({ message: message });
 			}
@@ -129,8 +171,10 @@ export class UserAuthentication {
 					.json({ message: "Please verify your email" });
 			}
 			//check user password
-			const { password, ...userDAta } = user as unknown as { password: string };
-			const checkPassword = await validatePassword(password, body.password);
+			const checkPassword: boolean = await user.validatePassword(
+				body.password,
+				user.password,
+			);
 			if (!checkPassword) {
 				return res.status(StatusCodes.BAD_REQUEST).json({ message });
 			}
@@ -149,6 +193,83 @@ export class UserAuthentication {
 			res
 				.status(StatusCodes.INTERNAL_SERVER_ERROR)
 				.json({ message: "Unable to login user", error });
+		}
+	}
+
+	public async forgotPassword(
+		req: Request<{}, {}, forgotPasswordInputs>,
+		res: Response,
+	) {
+		try {
+			const { email } = req.body as forgotPasswordInputs;
+			const message: string =
+				"If a user with that email is registered you will receive a password reset email";
+			const user = await findUserByEmail(email);
+
+			if (!user) {
+				log.debug(`User with email ${email} does not exists`);
+				return res.status(StatusCodes.OK).json({ message });
+			}
+
+			if (!user.verified) {
+				return res
+					.status(StatusCodes.UNAUTHORIZED)
+					.json({ message: "User not verified" });
+			}
+
+			const passwordResetCode = nanoid();
+			user.passwordResetCode = passwordResetCode;
+			await user.save();
+			await sendEmail({
+				to: user.email?.toString(),
+				from: "test@example.com",
+				subject: "Reset your password",
+				text: `Password reset code is: ${passwordResetCode} and Id is: ${user.id}`,
+			});
+			res.status(StatusCodes.OK).json({ message: message });
+		} catch (error: any) {
+			log.info(error.message);
+			res.status(500).send({
+				message: "Unable to send message",
+				error: error.message,
+			});
+		}
+	}
+
+	public async resetPassword(
+		req: Request<
+			resetPasswordInputs["params"],
+			{},
+			resetPasswordInputs["body"]
+		>,
+		res: Response,
+	) {
+		try {
+			const { id, passwordCode } = req.params as resetPasswordInputs["params"];
+			const { password, passwordConfirmation } =
+				req.body as resetPasswordInputs["body"];
+			const user = await findUserByPk(id);
+			if (
+				!user ||
+				!user.passwordResetCode ||
+				user.passwordResetCode.toString() !== passwordCode.toString()
+			) {
+				return res
+					.status(StatusCodes.BAD_REQUEST)
+					.json({ message: "Could not reset user password" });
+			}
+			user.passwordResetCode = null;
+			const newPassword = await hashPassword(password);
+			user.password = newPassword;
+			await user.save();
+			res
+				.status(StatusCodes.OK)
+				.json({ message: "Successfully updated password" });
+		} catch (error: any) {
+			res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
+				message: "Unable to verify password reset code",
+				error: error.message,
+			});
 		}
 	}
 }

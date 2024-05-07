@@ -1,7 +1,14 @@
 import { Router } from "express";
 import { UserAuthentication } from "../controllers/authController";
 import { validateInputs, authorizeUser } from "../middlewares";
-import { registerUserSchema, verifyUserSchema, loginSchema } from "../schema";
+import {
+	registerUserSchema,
+	verifyUserSchema,
+	loginSchema,
+	resendEmailSchema,
+	forgotPasswordSchema,
+	verifyresetPasswordSchema,
+} from "../schema";
 
 export class UserRouter {
 	private router: Router;
@@ -24,11 +31,31 @@ export class UserRouter {
 			validateInputs(verifyUserSchema),
 			this.userAuthentication.verifyUserAccount.bind(this.userAuthentication),
 		);
+		//resend verification email
+		this.router.post(
+			"/resend-email/:id",
+			validateInputs(resendEmailSchema),
+			this.userAuthentication.resendVerificationEmail.bind(
+				this.userAuthentication,
+			),
+		);
 		//verify login user
 		this.router.post(
 			"/login",
 			validateInputs(loginSchema),
 			this.userAuthentication.login.bind(this.userAuthentication),
+		);
+		//forgot password user
+		this.router.post(
+			"/forgot-password",
+			validateInputs(forgotPasswordSchema),
+			this.userAuthentication.forgotPassword.bind(this.userAuthentication),
+		);
+		//reset password user
+		this.router.post(
+			"/reset-password/:id/:passwordCode",
+			validateInputs(verifyresetPasswordSchema),
+			this.userAuthentication.resetPassword.bind(this.userAuthentication),
 		);
 	}
 	public getAuthRouter() {

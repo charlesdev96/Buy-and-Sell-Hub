@@ -9,6 +9,7 @@ import {
 	HasOne,
 	BeforeSave,
 } from "sequelize-typescript";
+import { compare } from "bcryptjs";
 
 import { nanoid } from "nanoid";
 
@@ -25,6 +26,7 @@ export interface UserAttributes {
 	gender?: String;
 	age?: String;
 	dob?: String;
+	passwordResetCode?: String | null;
 	createdAt?: Date;
 	updatedAt?: Date;
 }
@@ -77,8 +79,26 @@ export class Users
 	age?: String;
 	@Column({ field: "dob", allowNull: true, type: DataType.STRING(225) })
 	dob?: String;
+	@Default(null)
+	@Column({
+		field: "passwordResetCode",
+		allowNull: true,
+		type: DataType.STRING(),
+	})
+	passwordResetCode?: String | null;
 	@Column({ field: "createdAt", allowNull: true, type: DataType.DATE })
 	createdAt?: Date;
 	@Column({ field: "updatedAt", allowNull: true, type: DataType.DATE })
 	updatedAt?: Date;
+
+	// Method to validate password
+	public async validatePassword(
+		password: string,
+		userPassword: Users["password"],
+	): Promise<boolean> {
+		if (!userPassword) {
+			return false; // Password not set
+		}
+		return compare(password, userPassword.toString());
+	}
 }
