@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { UserRouter } from "./authRoutes";
+import { AuthRouter } from "./authRoutes";
+import { UserRouter } from "./userRoutes";
 
 class RouterConfig {
 	private router: Router;
@@ -11,7 +12,8 @@ class RouterConfig {
 	private configureRoutes() {
 		const baseUrl: string = "/api/v1";
 
-		this.router.use(`${baseUrl}/auth`, new UserRouter().getAuthRouter());
+		this.router.use(`${baseUrl}/auth`, new AuthRouter().getAuthRouter());
+		this.router.use(`${baseUrl}/user`, new UserRouter().getUserRouter());
 	}
 	public getRouter(): Router {
 		return this.router;

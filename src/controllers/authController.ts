@@ -15,17 +15,11 @@ import {
 	findUserByPhone,
 	existingUser,
 	hashPassword,
+	CustomRequest,
 } from "../services";
 import { createJWT, log, sendEmail } from "../utils";
 import { StatusCodes } from "http-status-codes";
 import { Users } from "../models";
-
-interface CustomRequest extends Request {
-	user?: {
-		userId?: string;
-		email?: string;
-	};
-}
 
 export class UserAuthentication {
 	public async register(
@@ -42,26 +36,30 @@ export class UserAuthentication {
 					.json({ message: "USer already exist" });
 			}
 			const user = await resgisterUser(body);
-			const payload: object = {
-				userId: body.id,
-				email: body.email,
-				phoneNumber: body.phoneNumber,
-			};
-
-			const token = createJWT({ payload });
 
 			//send email with verification code
 			const { verificationCode, id, email, ...userDAta } = user as {
 				verificationCode: string;
 				id: string;
 				email: string;
+				role: string;
 			};
+			const origin: string = "http://localhost:5000/api/v1";
+			const verifyEmail = `${origin}/auth/verify-email/${id}/${verificationCode}`;
+			const message = `<p>Please confirm your email by clicking on the following link: <a href="${verifyEmail}">Verify Email</a> </p>`;
 			await sendEmail({
 				to: email,
 				from: "test@example.com",
 				subject: "Verify your email/account",
-				text: `verification code: ${verificationCode} and your Id is: ${id}`,
+				html: `<h4> Hello, ${body.firstName} ${body.lastName}</h4> ${message}`,
 			});
+			const payload: object = {
+				userId: id,
+				email: email,
+				role: user?.role,
+			};
+
+			const token = createJWT({ payload });
 
 			res.status(StatusCodes.CREATED).json({
 				success: true,
@@ -75,13 +73,13 @@ export class UserAuthentication {
 		}
 	}
 
-	public async resendVerificationEmail(
-		req: Request<resendEmailInputs, {}, {}>,
-		res: Response,
-	) {
+	public async resendVerificationEmail(req: CustomRequest, res: Response) {
 		try {
-			const id = req.params.id;
-			const user = await findUserByPk(id);
+			const userId: string | undefined = req.user?.userId;
+			if (!userId) {
+				return res.status(StatusCodes.UNAUTHORIZED).send("Unauthorized");
+			}
+			const user = await findUserByPk(userId);
 			if (!user) {
 				return res
 					.status(StatusCodes.BAD_REQUEST)
@@ -94,11 +92,14 @@ export class UserAuthentication {
 					.json({ message: "User is already verified" });
 			}
 			const email = user.email;
+			const origin: string = "http://localhost:5000/api/v1";
+			const verifyEmail = `${origin}/auth/verify-account/${userId}/${user.verificationCode}`;
+			const message = `<p>Please confirm your email by clicking on the following link: <a href="${verifyEmail}">Verify Email</a> </p>`;
 			await sendEmail({
 				to: email?.toString(),
 				from: "test@example.com",
 				subject: "Verify your email/account",
-				text: `verification code: ${user.verificationCode} and your Id is: ${id}`,
+				html: `<h4> Hello, ${user.firstName} ${user.lastName} </h4> ${message}`,
 			});
 			res
 				.status(StatusCodes.OK)
@@ -114,8 +115,7 @@ export class UserAuthentication {
 		res: Response,
 	) {
 		try {
-			const id = req.params.id;
-			const verificationCode = req.params.verificationCode;
+			const { id, verificationCode } = req.params as verifyUser;
 
 			// find the user by id
 			const user = await findUserByPk(id);

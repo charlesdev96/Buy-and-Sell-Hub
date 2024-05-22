@@ -4,7 +4,7 @@ import { log } from "../src/utils";
 
 import { Sequelize } from "sequelize-typescript";
 import { Op } from "sequelize";
-import { Users } from "../src/models/index";
+import { Users, ProductModel } from "../src/models/index";
 import cron from "node-cron";
 import { EventEmitter } from "events";
 
@@ -14,13 +14,15 @@ export const sequelize = new Sequelize({
 	password: process.env.DB_PASSWORD,
 	host: "localhost",
 	dialect: "mysql",
-	logging: (sql, timing) => {
-		log.info(`Executing SQL: ${sql}`);
-		log.info(`Query timing: ${timing} ms`);
-	}, // Disable logging SQL queries (optional)
+	logging: false,
 });
 
-sequelize.addModels([Users]);
+// logging: (sql, timing) => {
+// 	log.info(`Executing SQL: ${sql}`);
+// 	log.info(`Query timing: ${timing} ms`);
+// }, // Disable logging SQL queries (optional)
+
+sequelize.addModels([Users, ProductModel]);
 
 // Function to delete unverified users created more than 30 minutes ago
 const deleteUnverifiedUsers = async () => {
@@ -50,7 +52,7 @@ const deleteUnverifiedUsers = async () => {
 
 // Schedule the function to run periodically (e.g., every minute)
 
-cron.schedule("* * * * *", async () => {
+cron.schedule("*/5 * * * *", async () => {
 	log.info("Running deleteUnverifiedUsers task...");
 	await deleteUnverifiedUsers();
 });

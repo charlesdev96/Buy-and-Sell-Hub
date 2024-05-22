@@ -4,6 +4,7 @@ import express, { Express } from "express";
 import { testConnection } from "../config/connectDB";
 import { log } from "./utils";
 import RouterConfig from "./routes/routes";
+import { notFound } from "./middlewares";
 
 const app: Express = express();
 const router = new RouterConfig();
@@ -12,6 +13,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(router.getRouter());
+
+//not found middleware router
+app.use(notFound);
 
 const port: string | number = process.env.PORT || 3000;
 

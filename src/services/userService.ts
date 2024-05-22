@@ -2,7 +2,7 @@ import { omit } from "lodash";
 import { UserAttributes, Users } from "../models";
 import { log } from "../utils";
 import bcrypt from "bcryptjs";
-import { nanoid } from "nanoid";
+import { Request } from "express";
 
 export const resgisterUser = async (input: UserAttributes) => {
 	try {
@@ -27,7 +27,11 @@ export const hashPassword = async (password: string) => {
 };
 
 export const findUserByPk = async (id: string) => {
-	return Users.findByPk(id);
+	return Users.findByPk(id, {
+		attributes: {
+			exclude: ["password", "verificationCode", "passwordResetCode"],
+		},
+	});
 };
 
 export const findUserByEmail = async (email: string) => {
@@ -41,3 +45,18 @@ export const findUserByPhone = async (phoneNumber: string) => {
 export const existingUser = async (phoneNumber: string, email: string) => {
 	return Users.findOne({ where: { phoneNumber: phoneNumber, email: email } });
 };
+
+export const updateuser = async (
+	userId: string,
+	updates: Partial<UserAttributes>,
+) => {
+	return Users.update(updates, { where: { id: userId } });
+};
+
+export interface CustomRequest extends Request {
+	user?: {
+		userId?: string;
+		email?: string;
+		role?: string;
+	};
+}

@@ -10,7 +10,7 @@ import {
 	verifyresetPasswordSchema,
 } from "../schema";
 
-export class UserRouter {
+export class AuthRouter {
 	private router: Router;
 	private userAuthentication: UserAuthentication;
 	constructor() {
@@ -26,15 +26,15 @@ export class UserRouter {
 			this.userAuthentication.register.bind(this.userAuthentication),
 		);
 		//verify user email user
-		this.router.post(
+		this.router.get(
 			"/verify-account/:id/:verificationCode",
 			validateInputs(verifyUserSchema),
 			this.userAuthentication.verifyUserAccount.bind(this.userAuthentication),
 		);
 		//resend verification email
 		this.router.post(
-			"/resend-email/:id",
-			validateInputs(resendEmailSchema),
+			"/resend-email",
+			authorizeUser,
 			this.userAuthentication.resendVerificationEmail.bind(
 				this.userAuthentication,
 			),

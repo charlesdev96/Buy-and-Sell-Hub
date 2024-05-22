@@ -4,14 +4,14 @@ import { isTokenValid } from "../utils";
 interface TokenPayLoad {
 	userId: string;
 	email: string;
-	phoneNumber: string;
+	role: string;
 }
 
 interface CustomRequest extends Request {
 	user?: {
 		userId: string;
 		email: string;
-		phoneNumber: string;
+		role: string;
 	};
 }
 
@@ -34,7 +34,7 @@ export const authorizeUser = async (
 		req.user = {
 			userId: payload.userId,
 			email: payload.email,
-			phoneNumber: payload.phoneNumber,
+			role: payload.role,
 		};
 		next();
 	} catch (error: any) {

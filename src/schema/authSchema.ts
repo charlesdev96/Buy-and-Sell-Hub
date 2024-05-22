@@ -21,6 +21,7 @@ export const registerUserSchema = z.object({
 			}),
 			verificationCode: z.string().optional(),
 			passwordResetCode: z.string().optional(),
+			// role: z.string().optional(),
 			dob: z
 				.string({
 					required_error: "gender is required",

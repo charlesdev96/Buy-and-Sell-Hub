@@ -7,26 +7,28 @@ import {
 	Model,
 	HasMany,
 	HasOne,
-	BeforeSave,
+	BelongsTo,
 } from "sequelize-typescript";
 import { compare } from "bcryptjs";
+import { ProductModel } from "../models";
 
 import { nanoid } from "nanoid";
 
 export interface UserAttributes {
-	id?: String;
-	firstName?: String;
-	lastName?: String;
-	email?: String;
-	password?: String;
-	phoneNumber?: String;
-	verificationCode?: String | null;
+	id?: string;
+	firstName?: string;
+	lastName?: string;
+	email?: string;
+	password?: string;
+	phoneNumber?: string;
+	verificationCode?: string | null;
 	verified?: Boolean;
 	role?: "admin" | "user";
-	gender?: String;
-	age?: String;
-	dob?: String;
-	passwordResetCode?: String | null;
+	gender?: string;
+	age?: string;
+	dob?: string;
+	products?: ProductModel[] | [];
+	passwordResetCode?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date;
 }
@@ -37,36 +39,36 @@ export class Users
 	implements UserAttributes
 {
 	@Default(DataType.UUIDV4)
-	@Index({ name: "custom_index_name", unique: true, using: "BTREE" })
+	@Index({ name: "user_id_index", unique: true, using: "BTREE" })
 	@Column({ field: "id", primaryKey: true, type: DataType.UUID, unique: true })
 	id?: string;
 	@Column({ field: "firstName", allowNull: true, type: DataType.STRING(225) })
-	firstName?: String;
+	firstName?: string;
 	@Column({ field: "lastName", allowNull: true, type: DataType.STRING(225) })
-	lastName?: String;
+	lastName?: string;
 	@Column({ field: "password", allowNull: true, type: DataType.STRING(225) })
-	password?: String;
+	password?: string;
 	@Column({
 		field: "email",
 		allowNull: true,
 		unique: true,
 		type: DataType.STRING(225),
 	})
-	email?: String;
+	email?: string;
 	@Column({
 		field: "phoneNumber",
 		allowNull: true,
 		unique: true,
 		type: DataType.STRING(225),
 	})
-	phoneNumber?: String;
+	phoneNumber?: string;
 	@Default(nanoid())
 	@Column({
 		field: "verificationCode",
 		allowNull: true,
 		type: DataType.STRING(),
 	})
-	verificationCode?: String | null;
+	verificationCode?: string | null;
 	@Default(false)
 	@Column({ field: "verified", allowNull: true, type: DataType.BOOLEAN })
 	verified?: Boolean | undefined;
@@ -74,22 +76,24 @@ export class Users
 	@Column({ field: "role", allowNull: true, type: DataType.STRING(225) })
 	role?: "admin" | "user";
 	@Column({ field: "gender", allowNull: true, type: DataType.STRING(225) })
-	gender?: String;
+	gender?: string;
 	@Column({ field: "age", allowNull: true, type: DataType.STRING(225) })
-	age?: String;
+	age?: string;
 	@Column({ field: "dob", allowNull: true, type: DataType.STRING(225) })
-	dob?: String;
+	dob?: string;
 	@Default(null)
 	@Column({
 		field: "passwordResetCode",
 		allowNull: true,
 		type: DataType.STRING(),
 	})
-	passwordResetCode?: String | null;
+	passwordResetCode?: string | null;
 	@Column({ field: "createdAt", allowNull: true, type: DataType.DATE })
 	createdAt?: Date;
 	@Column({ field: "updatedAt", allowNull: true, type: DataType.DATE })
 	updatedAt?: Date;
+	@HasMany(() => ProductModel)
+	products?: ProductModel[] | [];
 
 	// Method to validate password
 	public async validatePassword(
