@@ -6,10 +6,9 @@ import {
 	DataType,
 	Model,
 	HasMany,
-	HasOne,
 } from "sequelize-typescript";
 import { compare } from "bcryptjs";
-import { ProductModel } from "../models";
+import { ProductModel, ReviewModel } from "../models";
 
 import { nanoid } from "nanoid";
 
@@ -28,6 +27,7 @@ export interface UserAttributes {
 	age?: string;
 	dob?: string;
 	products?: ProductModel[] | [];
+	reviews?: ReviewModel[];
 	passwordResetCode?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date;
@@ -97,6 +97,8 @@ export class Users
 	updatedAt?: Date;
 	@HasMany(() => ProductModel, { constraints: false })
 	products?: ProductModel[] | [];
+	@HasMany(() => ReviewModel, { constraints: false })
+	reviews?: ReviewModel[] | [];
 
 	// Method to validate password
 	public async validatePassword(

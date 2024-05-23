@@ -6,21 +6,25 @@ import {
 	Default,
 	BelongsTo,
 	DataType,
+	HasMany,
 	BeforeCreate,
 	BeforeUpdate,
 	ForeignKey,
 } from "sequelize-typescript";
 import { ProductCategory } from "../utils";
-import { Users } from "../models";
+import { Users, ReviewModel } from "../models";
 
 export interface ProductAttributes {
 	productId?: string;
+	desc?: string | null;
 	productName?: string;
 	productPic?: string;
 	price?: number;
 	averageRating?: number;
 	quantity?: number;
 	sales?: number;
+	reviewId?: string;
+	reviews?: ReviewModel[] | [];
 	userId?: string;
 	vendor?: Users;
 	category?: ProductCategory;
@@ -42,14 +46,21 @@ export class ProductModel
 		unique: true,
 	})
 	productId?: string;
+	@Default(null)
+	@Column({ field: "desc", allowNull: true, type: DataType.STRING(1000) })
+	desc?: string | null;
 	@Column({ field: "productName", allowNull: true, type: DataType.STRING(225) })
 	productName?: string;
 	@Column({ field: "productPic", allowNull: true, type: DataType.STRING(225) })
 	productPic?: string;
-	@Column({ field: "price", allowNull: false, type: DataType.INTEGER })
+	@Column({ field: "price", allowNull: false, type: DataType.DECIMAL(13, 2) })
 	price?: number;
 	@Default(0.0)
-	@Column({ field: "averageRating", allowNull: false, type: DataType.FLOAT })
+	@Column({
+		field: "averageRating",
+		allowNull: false,
+		type: DataType.DECIMAL(5, 2),
+	})
 	averageRating?: number;
 	@Column({ field: "quantity", allowNull: false, type: DataType.INTEGER })
 	quantity?: number;
@@ -63,19 +74,23 @@ export class ProductModel
 	userId?: string;
 	@BelongsTo(() => Users, { constraints: false })
 	vendor?: Users;
+	@Column({ field: "reviewId", allowNull: true, type: DataType.UUID })
+	reviewId?: string;
+	@HasMany(() => ReviewModel)
+	reviews?: ReviewModel[] | [];
 
 	@BeforeCreate
 	@BeforeUpdate
 	static formatValues(instance: ProductModel) {
 		//add two extra zeros after decimal point
 		if (instance.price !== undefined && instance.price !== null) {
-			instance.price = parseFloat(instance.price.toFixed(2));
+			instance.price = Number(instance.price.toFixed(2));
 		}
 		if (
 			instance.averageRating !== undefined &&
 			instance.averageRating !== null
 		) {
-			instance.averageRating = parseFloat(instance.averageRating.toFixed(2));
+			instance.averageRating = Number(instance.averageRating.toFixed(2));
 		}
 	}
 }

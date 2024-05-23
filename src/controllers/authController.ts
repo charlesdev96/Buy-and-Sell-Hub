@@ -151,9 +151,6 @@ export class UserAuthentication {
 				.json({ message: "Could not verify user" });
 		} catch (error: any) {
 			log.info(error);
-			if (error.message.indexOf("Cast to ObjectId failed") !== -1) {
-				return res.json({ message: "Wrong Id format" });
-			}
 			res
 				.status(StatusCodes.INTERNAL_SERVER_ERROR)
 				.json({ message: "Could not verify user" });
