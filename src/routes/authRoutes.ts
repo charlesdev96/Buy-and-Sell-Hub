@@ -25,12 +25,6 @@ export class AuthRouter {
 			validateInputs(registerUserSchema),
 			this.userAuthentication.register.bind(this.userAuthentication),
 		);
-		//verify user email user
-		this.router.get(
-			"/verify-account/:id/:verificationCode",
-			validateInputs(verifyUserSchema),
-			this.userAuthentication.verifyUserAccount.bind(this.userAuthentication),
-		);
 		//resend verification email
 		this.router.post(
 			"/resend-email",
@@ -50,6 +44,12 @@ export class AuthRouter {
 			"/forgot-password",
 			validateInputs(forgotPasswordSchema),
 			this.userAuthentication.forgotPassword.bind(this.userAuthentication),
+		);
+		//verify user email user
+		this.router.post(
+			"/verify-account/:id/:verificationCode",
+			validateInputs(verifyUserSchema),
+			this.userAuthentication.verifyUserAccount.bind(this.userAuthentication),
 		);
 		//reset password user
 		this.router.post(

@@ -20,6 +20,7 @@ export interface ProductAttributes {
 	price?: number;
 	averageRating?: number;
 	quantity?: number;
+	sales?: number;
 	userId?: string;
 	vendor?: Users;
 	category?: ProductCategory;
@@ -45,19 +46,22 @@ export class ProductModel
 	productName?: string;
 	@Column({ field: "productPic", allowNull: true, type: DataType.STRING(225) })
 	productPic?: string;
-	@Column({ field: "price", allowNull: false, type: DataType.INTEGER() })
+	@Column({ field: "price", allowNull: false, type: DataType.INTEGER })
 	price?: number;
 	@Default(0.0)
 	@Column({ field: "averageRating", allowNull: false, type: DataType.FLOAT })
 	averageRating?: number;
-	@Column({ field: "quantity", allowNull: false, type: DataType.INTEGER() })
+	@Column({ field: "quantity", allowNull: false, type: DataType.INTEGER })
 	quantity?: number;
+	@Default(0)
+	@Column({ field: "sales", allowNull: false, type: DataType.INTEGER })
+	sales?: number;
 	@Column({ field: "category", allowNull: true, type: DataType.STRING() })
 	category?: ProductCategory;
 	@ForeignKey(() => Users)
 	@Column({ field: "userId", allowNull: true, type: DataType.UUID })
 	userId?: string;
-	@BelongsTo(() => Users)
+	@BelongsTo(() => Users, { constraints: false })
 	vendor?: Users;
 
 	@BeforeCreate

@@ -28,7 +28,10 @@ export class UserAuthentication {
 	) {
 		try {
 			const body = req.body as registerUserInput;
-			const userExist = await existingUser(body.phoneNumber, body.email);
+			const userExist = await existingUser(
+				body.phoneNumber,
+				body.email.toLowerCase(),
+			);
 			//if userexist return error
 			if (userExist) {
 				return res
@@ -45,7 +48,7 @@ export class UserAuthentication {
 				role: string;
 			};
 			const origin: string = "http://localhost:5000/api/v1";
-			const verifyEmail = `${origin}/auth/verify-email/${id}/${verificationCode}`;
+			const verifyEmail = `${origin}/auth/verify-account/${id}/${verificationCode}`;
 			const message = `<p>Please confirm your email by clicking on the following link: <a href="${verifyEmail}">Verify Email</a> </p>`;
 			await sendEmail({
 				to: email,
@@ -118,11 +121,11 @@ export class UserAuthentication {
 			const { id, verificationCode } = req.params as verifyUser;
 
 			// find the user by id
-			const user = await findUserByPk(id);
+			const user = await Users.findByPk(id);
 
 			if (!user) {
 				return res
-					.status(StatusCodes.BAD_REQUEST)
+					.status(StatusCodes.NOT_FOUND)
 					.json({ message: "Could not verify user" });
 			}
 
@@ -134,7 +137,7 @@ export class UserAuthentication {
 			}
 
 			// check to see if the verificationCode matches
-			if (user.verificationCode === verificationCode) {
+			if (user.verificationCode?.toString() === verificationCode.toString()) {
 				user.verified = true;
 				user.verificationCode = null;
 				await user.save();

@@ -7,7 +7,6 @@ import {
 	Model,
 	HasMany,
 	HasOne,
-	BelongsTo,
 } from "sequelize-typescript";
 import { compare } from "bcryptjs";
 import { ProductModel } from "../models";
@@ -22,9 +21,10 @@ export interface UserAttributes {
 	password?: string;
 	phoneNumber?: string;
 	verificationCode?: string | null;
-	verified?: Boolean;
+	verified?: boolean;
 	role?: "admin" | "user";
 	gender?: string;
+	numOfProducts?: number;
 	age?: string;
 	dob?: string;
 	products?: ProductModel[] | [];
@@ -48,17 +48,17 @@ export class Users
 	lastName?: string;
 	@Column({ field: "password", allowNull: true, type: DataType.STRING(225) })
 	password?: string;
+	@Index({ name: "email_index", unique: true })
 	@Column({
 		field: "email",
 		allowNull: true,
-		unique: true,
 		type: DataType.STRING(225),
 	})
 	email?: string;
+	@Index({ name: "phone_index", unique: true })
 	@Column({
 		field: "phoneNumber",
 		allowNull: true,
-		unique: true,
 		type: DataType.STRING(225),
 	})
 	phoneNumber?: string;
@@ -71,7 +71,10 @@ export class Users
 	verificationCode?: string | null;
 	@Default(false)
 	@Column({ field: "verified", allowNull: true, type: DataType.BOOLEAN })
-	verified?: Boolean | undefined;
+	verified?: boolean | undefined;
+	@Default(0)
+	@Column({ field: "numOfProducts", allowNull: true, type: DataType.INTEGER })
+	numOfProducts?: number;
 	@Default("user")
 	@Column({ field: "role", allowNull: true, type: DataType.STRING(225) })
 	role?: "admin" | "user";
@@ -92,7 +95,7 @@ export class Users
 	createdAt?: Date;
 	@Column({ field: "updatedAt", allowNull: true, type: DataType.DATE })
 	updatedAt?: Date;
-	@HasMany(() => ProductModel)
+	@HasMany(() => ProductModel, { constraints: false })
 	products?: ProductModel[] | [];
 
 	// Method to validate password

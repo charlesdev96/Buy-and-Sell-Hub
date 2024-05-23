@@ -3,6 +3,7 @@ import { UserAttributes, Users } from "../models";
 import { log } from "../utils";
 import bcrypt from "bcryptjs";
 import { Request } from "express";
+import { Op } from "sequelize";
 
 export const resgisterUser = async (input: UserAttributes) => {
 	try {
@@ -43,7 +44,11 @@ export const findUserByPhone = async (phoneNumber: string) => {
 };
 
 export const existingUser = async (phoneNumber: string, email: string) => {
-	return Users.findOne({ where: { phoneNumber: phoneNumber, email: email } });
+	return Users.findOne({
+		where: {
+			[Op.or]: [{ phoneNumber: phoneNumber }, { email: email.toLowerCase() }],
+		},
+	});
 };
 
 export const updateuser = async (
