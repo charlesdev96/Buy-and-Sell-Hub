@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createStoreSchema } from "./storeSchema";
 
 export const updateUserSchema = z.object({
 	body: z
@@ -9,7 +10,6 @@ export const updateUserSchema = z.object({
 			newPassword: z.string().optional(),
 			passwordConfirmation: z.string().optional(),
 			phoneNumber: z.string().optional(),
-			role: z.enum(["admin", "user"]).optional(),
 			gender: z.string().optional(),
 			age: z.string().optional(),
 			dob: z.string().optional(),
@@ -20,4 +20,13 @@ export const updateUserSchema = z.object({
 		}),
 });
 
+export const upgradeAccountSchema = z.object({
+	body: z.object({
+		role: z.enum(["user", "vendor", "admin"]),
+		store: createStoreSchema,
+	}),
+});
+
 export type updateUserInput = z.infer<typeof updateUserSchema>["body"];
+
+export type upgradeAccountInput = z.infer<typeof upgradeAccountSchema>["body"];

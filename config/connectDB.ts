@@ -4,7 +4,12 @@ import { log } from "../src/utils";
 
 import { Sequelize } from "sequelize-typescript";
 import { Op } from "sequelize";
-import { Users, ProductModel, ReviewModel } from "../src/models/index";
+import {
+	Users,
+	ProductModel,
+	ReviewModel,
+	StoreModel,
+} from "../src/models/index";
 import cron from "node-cron";
 import { EventEmitter } from "events";
 
@@ -22,7 +27,7 @@ export const sequelize = new Sequelize({
 // 	log.info(`Query timing: ${timing} ms`);
 // }, // Disable logging SQL queries (optional)
 
-sequelize.addModels([Users, ProductModel, ReviewModel]);
+sequelize.addModels([Users, ProductModel, ReviewModel, StoreModel]);
 
 // Function to delete unverified users created more than 30 minutes ago
 const deleteUnverifiedUsers = async () => {

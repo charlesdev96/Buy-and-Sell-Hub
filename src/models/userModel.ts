@@ -6,9 +6,11 @@ import {
 	DataType,
 	Model,
 	HasMany,
+	HasOne,
+	ForeignKey,
 } from "sequelize-typescript";
 import { compare } from "bcryptjs";
-import { ProductModel, ReviewModel } from "../models";
+import { ProductModel, ReviewModel, StoreModel } from "../models";
 
 import { nanoid } from "nanoid";
 
@@ -21,13 +23,15 @@ export interface UserAttributes {
 	phoneNumber?: string;
 	verificationCode?: string | null;
 	verified?: boolean;
-	role?: "admin" | "user";
+	role?: "admin" | "user" | "vendor";
 	gender?: string;
 	numOfProducts?: number;
 	age?: string;
 	dob?: string;
 	products?: ProductModel[] | [];
 	reviews?: ReviewModel[];
+	store?: StoreModel | null;
+	storeId?: string | null;
 	passwordResetCode?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date;
@@ -62,7 +66,7 @@ export class Users
 		type: DataType.STRING(225),
 	})
 	phoneNumber?: string;
-	@Default(nanoid())
+	@Default(() => nanoid())
 	@Column({
 		field: "verificationCode",
 		allowNull: true,
@@ -77,7 +81,7 @@ export class Users
 	numOfProducts?: number;
 	@Default("user")
 	@Column({ field: "role", allowNull: true, type: DataType.STRING(225) })
-	role?: "admin" | "user";
+	role?: "admin" | "user" | "vendor";
 	@Column({ field: "gender", allowNull: true, type: DataType.STRING(225) })
 	gender?: string;
 	@Column({ field: "age", allowNull: true, type: DataType.STRING(225) })
@@ -99,6 +103,11 @@ export class Users
 	products?: ProductModel[] | [];
 	@HasMany(() => ReviewModel, { constraints: false })
 	reviews?: ReviewModel[] | [];
+	@ForeignKey(() => StoreModel)
+	@Column({ field: "storeId", allowNull: true, type: DataType.UUID })
+	storeId?: string | null;
+	@HasOne(() => StoreModel, { constraints: false })
+	store?: StoreModel | null;
 
 	// Method to validate password
 	public async validatePassword(

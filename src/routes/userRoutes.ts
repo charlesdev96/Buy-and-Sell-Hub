@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { UserController } from "../controllers/userController";
 import { validateInputs, authorizeUser } from "../middlewares";
-import { updateUserSchema } from "../schema";
+import { updateUserSchema, upgradeAccountSchema } from "../schema";
 
 export class UserRouter {
 	private router: Router;
@@ -24,6 +24,13 @@ export class UserRouter {
 			authorizeUser,
 			validateInputs(updateUserSchema),
 			this.userController.updateProfile.bind(this.userController),
+		);
+		//upgrade user
+		this.router.post(
+			"/upgrade-account",
+			authorizeUser,
+			validateInputs(upgradeAccountSchema),
+			this.userController.upgradeAccount.bind(this.userController),
 		);
 	}
 	public getUserRouter() {

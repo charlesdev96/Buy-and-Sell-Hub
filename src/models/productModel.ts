@@ -12,7 +12,7 @@ import {
 	ForeignKey,
 } from "sequelize-typescript";
 import { ProductCategory } from "../utils";
-import { Users, ReviewModel } from "../models";
+import { Users, ReviewModel, StoreModel } from "../models";
 
 export interface ProductAttributes {
 	productId?: string;
@@ -23,10 +23,12 @@ export interface ProductAttributes {
 	averageRating?: number;
 	quantity?: number;
 	sales?: number;
-	reviewId?: string;
+	numOfReviews?: number;
 	reviews?: ReviewModel[] | [];
 	userId?: string;
+	storeId?: string;
 	vendor?: Users;
+	store?: StoreModel;
 	category?: ProductCategory;
 	createdAt?: Date;
 	updatedAt?: Date;
@@ -43,7 +45,6 @@ export class ProductModel
 		field: "productId",
 		primaryKey: true,
 		type: DataType.UUID,
-		unique: true,
 	})
 	productId?: string;
 	@Default(null)
@@ -67,6 +68,9 @@ export class ProductModel
 	@Default(0)
 	@Column({ field: "sales", allowNull: false, type: DataType.INTEGER })
 	sales?: number;
+	@Default(0)
+	@Column({ field: "numOfReviews", allowNull: false, type: DataType.INTEGER })
+	numOfReviews?: number;
 	@Column({ field: "category", allowNull: true, type: DataType.STRING() })
 	category?: ProductCategory;
 	@ForeignKey(() => Users)
@@ -74,20 +78,23 @@ export class ProductModel
 	userId?: string;
 	@BelongsTo(() => Users, { constraints: false })
 	vendor?: Users;
-	@Column({ field: "reviewId", allowNull: true, type: DataType.UUID })
-	reviewId?: string;
 	@HasMany(() => ReviewModel)
 	reviews?: ReviewModel[] | [];
+	@ForeignKey(() => StoreModel)
+	@Column({ field: "storeId", allowNull: true, type: DataType.UUID })
+	storeId?: string;
+	@BelongsTo(() => StoreModel)
+	store?: StoreModel;
 
 	@BeforeCreate
 	@BeforeUpdate
 	static formatValues(instance: ProductModel) {
 		//add two extra zeros after decimal point
-		if (instance.price !== undefined && instance.price !== null) {
+		if (typeof instance.price === "number") {
 			instance.price = Number(instance.price.toFixed(2));
 		}
 		if (
-			instance.averageRating !== undefined &&
+			typeof instance.averageRating === "number" &&
 			instance.averageRating !== null
 		) {
 			instance.averageRating = Number(instance.averageRating.toFixed(2));

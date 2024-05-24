@@ -28,7 +28,7 @@ export const hashPassword = async (password: string) => {
 };
 
 export const findUserByPk = async (id: string) => {
-	return Users.findByPk(id, {
+	return await Users.findByPk(id, {
 		attributes: {
 			exclude: ["password", "verificationCode", "passwordResetCode"],
 		},
@@ -36,15 +36,15 @@ export const findUserByPk = async (id: string) => {
 };
 
 export const findUserByEmail = async (email: string) => {
-	return Users.findOne({ where: { email: email } });
+	return await Users.findOne({ where: { email: email } });
 };
 
 export const findUserByPhone = async (phoneNumber: string) => {
-	return Users.findOne({ where: { phoneNumber: phoneNumber } });
+	return await Users.findOne({ where: { phoneNumber: phoneNumber } });
 };
 
 export const existingUser = async (phoneNumber: string, email: string) => {
-	return Users.findOne({
+	return await Users.findOne({
 		where: {
 			[Op.or]: [{ phoneNumber: phoneNumber }, { email: email.toLowerCase() }],
 		},
@@ -55,7 +55,7 @@ export const updateuser = async (
 	userId: string,
 	updates: Partial<UserAttributes>,
 ) => {
-	return Users.update(updates, { where: { id: userId } });
+	return await Users.update(updates, { where: { id: userId } });
 };
 
 export interface CustomRequest extends Request {

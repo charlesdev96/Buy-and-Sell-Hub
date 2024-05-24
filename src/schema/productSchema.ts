@@ -21,6 +21,7 @@ export const createProductSchema = z.object({
 			required_error: "Please provide a product quantity",
 		}),
 		userId: z.string().uuid().optional(),
+		storeId: z.string().uuid().optional(),
 		category: z.enum(PRODUCT_CATEGORIES, {
 			required_error: "Please provide a valid product category",
 		}),

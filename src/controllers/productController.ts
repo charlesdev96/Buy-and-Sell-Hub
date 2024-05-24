@@ -32,7 +32,21 @@ export class ProductController {
 					.status(StatusCodes.NOT_FOUND)
 					.json({ message: "User not found" });
 			}
+			//check if user is a vendor
+			if (user.role !== "vendor" && user.role !== "admin") {
+				return res
+					.status(StatusCodes.FORBIDDEN)
+					.json({ message: "You are not allowed to access this route" });
+			}
+			const storeId = user.storeId;
+			//check for null
+			if (!storeId) {
+				return res
+					.status(StatusCodes.FORBIDDEN)
+					.json({ message: "You are not allowed to access this route" });
+			}
 			body.userId = userId;
+			body.storeId = storeId;
 			const product = await createNewProduct(body, userId.toString());
 
 			res.status(StatusCodes.CREATED).json({

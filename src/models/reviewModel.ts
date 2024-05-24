@@ -36,7 +36,6 @@ export class ReviewModel
 		field: "reviewId",
 		primaryKey: true,
 		type: DataType.UUID,
-		unique: true,
 	})
 	reviewId?: string;
 	@Default(null)

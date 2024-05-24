@@ -1,28 +1,39 @@
-import { ProductModel, ProductAttributes, Users, ReviewModel } from "../models";
+import {
+	ProductModel,
+	ProductAttributes,
+	Users,
+	ReviewModel,
+	StoreModel,
+} from "../models";
 
 export const createNewProduct = async (
 	input: ProductAttributes,
 	userId: string,
 ) => {
 	await Users.increment("numOfProducts", { by: 1, where: { id: userId } });
-	return ProductModel.create(input);
+	return await ProductModel.create(input);
 };
 
 export const singleProduct = async (productId: string) => {
-	return ProductModel.findByPk(productId, {
+	return await ProductModel.findByPk(productId, {
 		attributes: {
-			exclude: ["quantity", "userId"],
+			exclude: ["quantity", "userId", "storeId"],
 		},
 		include: [
 			{
+				model: StoreModel,
+				as: "store",
+				attributes: ["storeId", "storeName", "storeAddress"],
+			},
+			{
 				model: Users,
 				as: "vendor",
-				attributes: ["id", "firstName", "LastName"],
+				attributes: ["id", "firstName", "LastName", "role"],
 			},
 			{
 				model: ReviewModel,
 				as: "reviews",
-				attributes: ["reviewId", "comment", "rating"],
+				attributes: ["reviewId", "comment", "rating", "createdAt", "updatedAt"],
 				include: [
 					{
 						model: Users,
@@ -36,7 +47,7 @@ export const singleProduct = async (productId: string) => {
 };
 
 export const allProduct = async () => {
-	return ProductModel.findAndCountAll({
+	return await ProductModel.findAndCountAll({
 		attributes: [
 			"productId",
 			"productName",
@@ -53,5 +64,11 @@ export const updateProduct = async (
 	productId: string,
 	updates: Partial<ProductAttributes>,
 ) => {
-	return ProductModel.update(updates, { where: { productId: productId } });
+	return await ProductModel.update(updates, {
+		where: { productId: productId },
+	});
+};
+
+export const findProductById = async (productId: string) => {
+	return await ProductModel.findByPk(productId);
 };

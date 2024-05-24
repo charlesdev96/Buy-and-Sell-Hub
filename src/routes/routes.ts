@@ -2,6 +2,8 @@ import { Router } from "express";
 import { AuthRouter } from "./authRoutes";
 import { UserRouter } from "./userRoutes";
 import { ProductRouter } from "./productRoute";
+import { ReviewRouter } from "./reviewRoute";
+import { VendorRouter } from "./vendorRoute";
 
 class RouterConfig {
 	private router: Router;
@@ -19,6 +21,8 @@ class RouterConfig {
 			`${baseUrl}/product`,
 			new ProductRouter().getProductRouter(),
 		);
+		this.router.use(`${baseUrl}/review`, new ReviewRouter().getReviewRouter());
+		this.router.use(`${baseUrl}/vendor`, new VendorRouter().getVendorRouter());
 	}
 	public getRouter(): Router {
 		return this.router;
