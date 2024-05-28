@@ -4,7 +4,6 @@ import {
 	registerUserInput,
 	verifyUser,
 	loginInputs,
-	resendEmailInputs,
 	forgotPasswordInputs,
 	resetPasswordInputs,
 } from "../schema";
@@ -12,7 +11,6 @@ import {
 	resgisterUser,
 	findUserByPk,
 	findUserByEmail,
-	findUserByPhone,
 	existingUser,
 	hashPassword,
 	CustomRequest,
@@ -23,7 +21,7 @@ import { Users } from "../models";
 
 export class UserAuthentication {
 	public async register(
-		req: Request<{}, {}, registerUserInput>,
+		req: Request<object, object, registerUserInput>,
 		res: Response,
 	) {
 		try {
@@ -41,6 +39,7 @@ export class UserAuthentication {
 			const user = await resgisterUser(body);
 
 			//send email with verification code
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { verificationCode, id, email, ...userDAta } = user as {
 				verificationCode: string;
 				id: string;
@@ -114,7 +113,7 @@ export class UserAuthentication {
 	}
 
 	public async verifyUserAccount(
-		req: Request<verifyUser, {}, {}>,
+		req: Request<verifyUser, object, object>,
 		res: Response,
 	) {
 		try {
@@ -157,7 +156,7 @@ export class UserAuthentication {
 		}
 	}
 
-	public async login(req: Request<{}, {}, loginInputs>, res: Response) {
+	public async login(req: Request<object, object, loginInputs>, res: Response) {
 		try {
 			const body = req.body as loginInputs;
 			const message = "Invalid email or password";
@@ -197,7 +196,7 @@ export class UserAuthentication {
 	}
 
 	public async forgotPassword(
-		req: Request<{}, {}, forgotPasswordInputs>,
+		req: Request<object, object, forgotPasswordInputs>,
 		res: Response,
 	) {
 		try {
@@ -239,13 +238,14 @@ export class UserAuthentication {
 	public async resetPassword(
 		req: Request<
 			resetPasswordInputs["params"],
-			{},
+			object,
 			resetPasswordInputs["body"]
 		>,
 		res: Response,
 	) {
 		try {
 			const { id, passwordCode } = req.params as resetPasswordInputs["params"];
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { password, passwordConfirmation } =
 				req.body as resetPasswordInputs["body"];
 			const user = await findUserByPk(id);

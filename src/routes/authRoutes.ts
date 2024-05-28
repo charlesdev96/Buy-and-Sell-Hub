@@ -5,7 +5,6 @@ import {
 	registerUserSchema,
 	verifyUserSchema,
 	loginSchema,
-	resendEmailSchema,
 	forgotPasswordSchema,
 	verifyresetPasswordSchema,
 } from "../schema";

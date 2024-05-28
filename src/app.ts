@@ -5,57 +5,39 @@ import { testConnection } from "../config/connectDB";
 import { log } from "./utils";
 import RouterConfig from "./routes/routes";
 import { notFound } from "./middlewares";
+import cors from "cors";
+import helmet from "helmet";
 
-const app: Express = express();
-const router = new RouterConfig();
+class AppStarter {
+	private app: Express;
+	private port: number | string;
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+	constructor() {
+		this.app = express();
+		this.port = process.env.PORT || 3000;
+		this.initializeMiddlewares();
+		this.initializeRoutes();
+	}
 
-app.use(router.getRouter());
+	private initializeMiddlewares(): void {
+		this.app.use(helmet());
+		this.app.use(cors());
+		this.app.use(express.json());
+		this.app.use(express.urlencoded({ extended: false }));
+	}
 
-//not found middleware router
-app.use(notFound);
+	private initializeRoutes(): void {
+		this.app.use(new RouterConfig().getRouter());
+		this.app.use(notFound);
+	}
 
-const port: string | number = process.env.PORT || 3000;
+	public async starter(): Promise<void> {
+		await testConnection();
+		this.app.listen(this.port, () => {
+			log.info(`Server started on port ${this.port}`);
+		});
+	}
+}
 
-const starter = async (): Promise<any> => {
-	await testConnection();
-	app.listen(port, () => {
-		log.info(`Server started on port ${port}`);
-	});
-};
-
-starter();
-
-// class App {
-// 	public app: Application;
-// 	public port: number | string;
-
-// 	constructor() {
-// 		this.app = express();
-// 		this.port = process.env.PORT || 3000;
-// 		this.initializeRoutes();
-// 		this.initializeMiddlewares();
-// 	}
-
-// 	private initializeMiddlewares(): void {
-// 		this.app.use(express.json());
-// 		this.app.use(express.urlencoded({ extended: false }));
-// 	}
-
-// 	private initializeRoutes(): void {
-// 		const routerConfig = new RouterConfig();
-// 		this.app.use(routerConfig.getRouter());
-// 	}
-
-// 	public async start(): Promise<void> {
-// 		await testConnection();
-// 		this.app.listen(this.port, () => {
-// 			log.info(`Server started on port ${this.port}`);
-// 		});
-// 	}
-// }
-
-// const server = new App();
-// server.start();
+const server = new AppStarter();
+server.starter();

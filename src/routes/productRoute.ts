@@ -6,7 +6,6 @@ import {
 	singleProductSchema,
 	updateProductSchema,
 } from "../schema";
-import { validate } from "node-cron";
 
 export class ProductRouter {
 	private router: Router;
