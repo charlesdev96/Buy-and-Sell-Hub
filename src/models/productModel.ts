@@ -10,9 +10,16 @@ import {
 	BeforeCreate,
 	BeforeUpdate,
 	ForeignKey,
+	BelongsToMany,
 } from "sequelize-typescript";
 import { ProductCategory } from "../utils";
-import { Users, ReviewModel, StoreModel } from "../models";
+import {
+	Users,
+	ReviewModel,
+	StoreModel,
+	CartModel,
+	CartItemModel,
+} from "../models";
 
 export interface ProductAttributes {
 	productId?: string;
@@ -25,6 +32,7 @@ export interface ProductAttributes {
 	sales?: number;
 	numOfReviews?: number;
 	reviews?: ReviewModel[] | [];
+	cart?: CartModel[];
 	userId?: string;
 	storeId?: string;
 	vendor?: Users;
@@ -76,7 +84,11 @@ export class ProductModel
 	@ForeignKey(() => Users)
 	@Column({ field: "userId", allowNull: true, type: DataType.UUID })
 	userId?: string;
-	@BelongsTo(() => Users, { constraints: false })
+	@BelongsTo(() => Users, {
+		constraints: false,
+		onDelete: "CASCADE",
+		onUpdate: "CASCADE",
+	})
 	vendor?: Users;
 	@HasMany(() => ReviewModel)
 	reviews?: ReviewModel[] | [];
@@ -85,6 +97,8 @@ export class ProductModel
 	storeId?: string;
 	@BelongsTo(() => StoreModel)
 	store?: StoreModel;
+	@BelongsToMany(() => CartModel, () => CartItemModel)
+	cart?: CartModel[];
 
 	@BeforeCreate
 	@BeforeUpdate

@@ -4,6 +4,7 @@ import { UserRouter } from "./userRoutes";
 import { ProductRouter } from "./productRoute";
 import { ReviewRouter } from "./reviewRoute";
 import { VendorRouter } from "./vendorRoute";
+import { CartRouter } from "./cartRoutes";
 
 class RouterConfig {
 	private router: Router;
@@ -23,6 +24,7 @@ class RouterConfig {
 		);
 		this.router.use(`${baseUrl}/review`, new ReviewRouter().getReviewRouter());
 		this.router.use(`${baseUrl}/vendor`, new VendorRouter().getVendorRouter());
+		this.router.use(`${baseUrl}/cart`, new CartRouter().getCartRouter());
 	}
 	public getRouter(): Router {
 		return this.router;

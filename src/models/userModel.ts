@@ -10,7 +10,7 @@ import {
 	ForeignKey,
 } from "sequelize-typescript";
 import { compare } from "bcryptjs";
-import { ProductModel, ReviewModel, StoreModel } from "../models";
+import { ProductModel, ReviewModel, StoreModel, CartModel } from "../models";
 
 import { nanoid } from "nanoid";
 
@@ -33,6 +33,7 @@ export interface UserAttributes {
 	store?: StoreModel | null;
 	storeId?: string | null;
 	passwordResetCode?: string | null;
+	cart?: CartModel[] | [];
 	createdAt?: Date;
 	updatedAt?: Date;
 }
@@ -108,6 +109,8 @@ export class Users
 	storeId?: string | null;
 	@HasOne(() => StoreModel, { constraints: false })
 	store?: StoreModel | null;
+	@HasMany(() => CartModel, { constraints: false })
+	cart?: CartModel[] | [];
 
 	// Method to validate password
 	public async validatePassword(

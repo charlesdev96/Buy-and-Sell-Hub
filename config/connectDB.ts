@@ -9,6 +9,8 @@ import {
 	ProductModel,
 	ReviewModel,
 	StoreModel,
+	CartModel,
+	CartItemModel,
 } from "../src/models/index";
 import cron from "node-cron";
 import { EventEmitter } from "events";
@@ -27,7 +29,14 @@ export const sequelize = new Sequelize({
 // 	log.info(`Query timing: ${timing} ms`);
 // }, // Disable logging SQL queries (optional)
 
-sequelize.addModels([Users, ProductModel, ReviewModel, StoreModel]);
+sequelize.addModels([
+	Users,
+	ProductModel,
+	ReviewModel,
+	StoreModel,
+	CartModel,
+	CartItemModel,
+]);
 
 // Function to delete unverified users created more than 30 minutes ago
 const deleteUnverifiedUsers = async () => {

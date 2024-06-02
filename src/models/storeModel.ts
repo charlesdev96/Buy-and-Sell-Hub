@@ -60,7 +60,11 @@ export class StoreModel
 	@ForeignKey(() => Users)
 	@Column({ field: "userId", allowNull: true, type: DataType.UUID })
 	userId?: string;
-	@BelongsTo(() => Users, { constraints: false })
+	@BelongsTo(() => Users, {
+		constraints: false,
+		onDelete: "CASCADE",
+		onUpdate: "CASCADE",
+	})
 	vendor?: Users;
 	@HasMany(() => ProductModel, { constraints: false })
 	products?: ProductModel[] | [];

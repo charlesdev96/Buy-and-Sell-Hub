@@ -47,12 +47,20 @@ export class ReviewModel
 	@ForeignKey(() => ProductModel)
 	@Column({ field: "productId", allowNull: true, type: DataType.UUID })
 	productId?: string;
-	@BelongsTo(() => ProductModel, { constraints: false })
+	@BelongsTo(() => ProductModel, {
+		constraints: false,
+		onDelete: "CASCADE",
+		onUpdate: "CASCADE",
+	})
 	product?: ProductModel;
 	@ForeignKey(() => Users)
 	@Column({ field: "userId", allowNull: true, type: DataType.UUID })
 	userId?: string;
-	@BelongsTo(() => Users, { constraints: false })
+	@BelongsTo(() => Users, {
+		constraints: false,
+		onDelete: "SET NULL",
+		onUpdate: "CASCADE",
+	})
 	reviewedBy?: Users;
 
 	@BeforeCreate
