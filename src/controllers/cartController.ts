@@ -8,6 +8,7 @@ import {
 	CustomRequest,
 	findUserByPk,
 	findProductById,
+	getAllProductsInCart,
 } from "../services";
 import { StatusCodes } from "http-status-codes";
 import { log } from "../utils";
@@ -81,6 +82,43 @@ export class CartController {
 			res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
 				success: false,
 				message: `Unable to add product to cart due to: ${error.message}`,
+			});
+		}
+	}
+
+	public async getAllUserProductInCart(req: CustomRequest, res: Response) {
+		try {
+			const userId = req.user?.userId;
+			if (!userId) {
+				return res
+					.status(StatusCodes.UNAUTHORIZED)
+					.json({ message: "Athentication failed: Please login again" });
+			}
+			//find user
+			const user = await findUserByPk(userId);
+			if (!user) {
+				return res
+					.status(StatusCodes.NOT_FOUND)
+					.json({ message: "User not found" });
+			}
+			const cart = await getAllProductsInCart(userId);
+			if (!cart) {
+				return res.status(StatusCodes.OK).json({
+					success: true,
+					message: "You don't have any product in your cart yet",
+					data: [],
+				});
+			}
+			res.status(StatusCodes.OK).json({
+				success: true,
+				message: "List of all products in your cart",
+				data: cart.cartItems,
+			});
+		} catch (error: any) {
+			log.info(error);
+			res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+				success: false,
+				message: `Unable to get product in cart due to: ${error.message}`,
 			});
 		}
 	}

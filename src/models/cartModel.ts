@@ -16,7 +16,7 @@ export interface CartAttributes {
 	cartId?: string;
 	userId?: string;
 	owner?: Users;
-	cartItems?: CartItemModel[];
+	cartItems?: ProductModel[];
 	createdAt?: Date;
 	updatedAt?: Date;
 }
@@ -40,5 +40,5 @@ export class CartModel
 	})
 	owner?: Users;
 	@BelongsToMany(() => ProductModel, () => CartItemModel)
-	cartItems?: CartItemModel[];
+	cartItems?: ProductModel[];
 }

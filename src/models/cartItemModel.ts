@@ -42,8 +42,16 @@ export class CartItemModel
 	@ForeignKey(() => ProductModel)
 	@Column({ field: "productId", allowNull: true, type: DataType.UUID })
 	productId!: string;
-	@BelongsTo(() => ProductModel, { onDelete: "CASCADE", onUpdate: "CASCADE" })
+	@BelongsTo(() => ProductModel, {
+		onDelete: "CASCADE",
+		onUpdate: "CASCADE",
+		constraints: false,
+	})
 	product?: ProductModel;
-	@BelongsTo(() => CartModel, { onDelete: "CASCADE", onUpdate: "CASCADE" })
+	@BelongsTo(() => CartModel, {
+		onDelete: "CASCADE",
+		onUpdate: "CASCADE",
+		constraints: false,
+	})
 	cart?: CartModel;
 }

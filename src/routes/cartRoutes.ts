@@ -18,6 +18,11 @@ export class CartRouter {
 			validateInputs(createCartSchema),
 			this.cartController.addToCart.bind(this.cartController),
 		);
+		this.router.get(
+			"/get-cart",
+			authorizeUser,
+			this.cartController.getAllUserProductInCart.bind(this.cartController),
+		);
 	}
 
 	public getCartRouter() {

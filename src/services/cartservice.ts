@@ -3,6 +3,7 @@ import {
 	CartModel,
 	CartItemModel,
 	CartItemAttribute,
+	ProductModel,
 } from "../models";
 
 export const createCart = async (input: CartAttributes) => {
@@ -24,4 +25,26 @@ export const checkIfProductInUserCart = async (
 
 export const addProductToCart = async (input: CartItemAttribute) => {
 	return await CartItemModel.create(input);
+};
+
+export const getAllProductsInCart = async (userId: string) => {
+	return await CartModel.findOne({
+		where: { userId: userId },
+		attributes: [],
+		include: [
+			{
+				model: ProductModel,
+				as: "cartItems",
+				through: { attributes: [] },
+				attributes: [
+					"productId",
+					"productPic",
+					"desc",
+					"price",
+					"averageRating",
+					"category",
+				],
+			},
+		],
+	});
 };
