@@ -27,7 +27,7 @@ export interface StoreAttributes {
 	products?: ProductModel[];
 	userId?: string;
 	vendor?: Users;
-	storeAddress?: storeAddress | null;
+	storeAddress?: storeAddress[] | null;
 	createdAt?: Date;
 	updatedAt?: Date;
 }
@@ -47,16 +47,9 @@ export class StoreModel
 	@Column({
 		field: "storeAddress",
 		allowNull: true,
-		type: DataType.TEXT,
-		get() {
-			const rawValue = this.getDataValue("storeAddress");
-			return rawValue ? JSON.parse(rawValue) : null;
-		},
-		set(value: storeAddress | null) {
-			this.setDataValue("storeAddress", value ? JSON.stringify(value) : null);
-		},
+		type: DataType.JSON,
 	})
-	storeAddress?: storeAddress | null;
+	storeAddress?: storeAddress[] | null;
 	@ForeignKey(() => Users)
 	@Column({ field: "userId", allowNull: true, type: DataType.UUID })
 	userId?: string;
