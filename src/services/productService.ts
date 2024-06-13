@@ -47,7 +47,7 @@ export const singleProduct = async (productId: string) => {
 };
 
 export const allProduct = async () => {
-	return await ProductModel.findAndCountAll({
+	return await ProductModel.findAll({
 		attributes: [
 			"productId",
 			"productName",
