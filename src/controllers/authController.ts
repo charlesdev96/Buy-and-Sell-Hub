@@ -18,6 +18,7 @@ import {
 import { createJWT, log, sendEmail } from "../utils";
 import { StatusCodes } from "http-status-codes";
 import { Users } from "../models";
+import { isAfter, addMinutes } from "date-fns";
 
 export class UserAuthentication {
 	public async register(
@@ -36,6 +37,7 @@ export class UserAuthentication {
 					.status(StatusCodes.BAD_REQUEST)
 					.json({ message: "USer already exist" });
 			}
+			body.expirationDate = addMinutes(new Date(), 30);
 			const user = await resgisterUser(body);
 
 			//send email with verification code
@@ -136,18 +138,31 @@ export class UserAuthentication {
 			}
 
 			// check to see if the verificationCode matches
-			if (user.verificationCode?.toString() === verificationCode.toString()) {
-				user.verified = true;
-				user.verificationCode = null;
-				await user.save();
+			if (user.verificationCode?.toString() !== verificationCode.toString()) {
 				return res
 					.status(StatusCodes.OK)
-					.json({ message: "User successfully verified" });
+					.json({ message: "Invalid or expired verification code" });
 			}
-			//if conditions not certified
-			return res
-				.status(StatusCodes.BAD_REQUEST)
-				.json({ message: "Could not verify user" });
+			//check expiration date
+			const currentDate: Date = new Date();
+			const expirationDate = user.expirationDate;
+			if (!expirationDate) {
+				return res
+					.status(StatusCodes.BAD_REQUEST)
+					.json({ message: "No expiration date found" });
+			}
+			if (isAfter(currentDate, expirationDate)) {
+				return res
+					.status(StatusCodes.OK)
+					.json({ message: "Invalid or expired verification code" });
+			}
+			user.verificationCode = null;
+			user.expirationDate = null;
+			await user.save();
+
+			res
+				.status(StatusCodes.OK)
+				.json({ message: "User successfully verified" });
 		} catch (error: any) {
 			log.info(error);
 			res
@@ -216,14 +231,16 @@ export class UserAuthentication {
 					.json({ message: "User not verified" });
 			}
 
-			const passwordResetCode = nanoid();
-			user.passwordResetCode = passwordResetCode;
+			const verificationCode = nanoid();
+			const expirationDate: Date = addMinutes(new Date(), 30);
+			user.verificationCode = verificationCode;
+			user.expirationDate = expirationDate;
 			await user.save();
 			await sendEmail({
 				to: user.email?.toString(),
 				from: "test@example.com",
 				subject: "Reset your password",
-				text: `Password reset code is: ${passwordResetCode} and Id is: ${user.id}`,
+				text: `Password reset code is: ${verificationCode} and Id is: ${user.id}`,
 			});
 			res.status(StatusCodes.OK).json({ message: message });
 		} catch (error: any) {
@@ -244,21 +261,35 @@ export class UserAuthentication {
 		res: Response,
 	) {
 		try {
-			const { id, passwordCode } = req.params as resetPasswordInputs["params"];
+			const { id, verificationCode } =
+				req.params as resetPasswordInputs["params"];
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { password, passwordConfirmation } =
 				req.body as resetPasswordInputs["body"];
 			const user = await findUserByPk(id);
 			if (
 				!user ||
-				!user.passwordResetCode ||
-				user.passwordResetCode.toString() !== passwordCode.toString()
+				!user.verificationCode ||
+				user.verificationCode.toString() !== verificationCode.toString()
 			) {
 				return res
 					.status(StatusCodes.BAD_REQUEST)
-					.json({ message: "Could not reset user password" });
+					.json({ message: "Invalid or expired verification code" });
 			}
-			user.passwordResetCode = null;
+			//check if verification has expired
+			const currentDate: Date = new Date();
+			const expirationDate = user.expirationDate;
+			if (!expirationDate) {
+				return res
+					.status(StatusCodes.BAD_REQUEST)
+					.json({ message: "No expiration date found" });
+			}
+			if (isAfter(currentDate, expirationDate)) {
+				return res
+					.status(StatusCodes.BAD_REQUEST)
+					.json({ message: "Invalid or expired verification code" });
+			}
+			user.verificationCode = null;
 			const newPassword = await hashPassword(password);
 			user.password = newPassword;
 			await user.save();

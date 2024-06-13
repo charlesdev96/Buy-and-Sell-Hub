@@ -45,7 +45,7 @@ export class AuthRouter {
 			this.userAuthentication.forgotPassword.bind(this.userAuthentication),
 		);
 		//verify user email user
-		this.router.post(
+		this.router.get(
 			"/verify-account/:id/:verificationCode",
 			validateInputs(verifyUserSchema),
 			this.userAuthentication.verifyUserAccount.bind(this.userAuthentication),

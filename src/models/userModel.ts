@@ -22,9 +22,10 @@ export interface UserAttributes {
 	password?: string;
 	phoneNumber?: string;
 	verificationCode?: string | null;
+	expirationDate?: Date | null;
 	verified?: boolean;
 	role?: "admin" | "user" | "vendor";
-	gender?: string;
+	gender?: "male" | "female";
 	numOfProducts?: number;
 	age?: string;
 	dob?: string;
@@ -32,7 +33,6 @@ export interface UserAttributes {
 	reviews?: ReviewModel[];
 	store?: StoreModel | null;
 	storeId?: string | null;
-	passwordResetCode?: string | null;
 	cart?: CartModel[] | [];
 	createdAt?: Date;
 	updatedAt?: Date;
@@ -74,6 +74,13 @@ export class Users
 		type: DataType.STRING(),
 	})
 	verificationCode?: string | null;
+	@Default(null)
+	@Column({
+		field: "expirationDate",
+		allowNull: true,
+		type: DataType.DATE,
+	})
+	expirationDate?: Date | null;
 	@Default(false)
 	@Column({ field: "verified", allowNull: true, type: DataType.BOOLEAN })
 	verified?: boolean | undefined;
@@ -84,18 +91,11 @@ export class Users
 	@Column({ field: "role", allowNull: true, type: DataType.STRING(225) })
 	role?: "admin" | "user" | "vendor";
 	@Column({ field: "gender", allowNull: true, type: DataType.STRING(225) })
-	gender?: string;
+	gender?: "male" | "female";
 	@Column({ field: "age", allowNull: true, type: DataType.STRING(225) })
 	age?: string;
 	@Column({ field: "dob", allowNull: true, type: DataType.STRING(225) })
 	dob?: string;
-	@Default(null)
-	@Column({
-		field: "passwordResetCode",
-		allowNull: true,
-		type: DataType.STRING(),
-	})
-	passwordResetCode?: string | null;
 	@Column({ field: "createdAt", allowNull: true, type: DataType.DATE })
 	createdAt?: Date;
 	@Column({ field: "updatedAt", allowNull: true, type: DataType.DATE })
@@ -109,7 +109,7 @@ export class Users
 	storeId?: string | null;
 	@HasOne(() => StoreModel, { constraints: false })
 	store?: StoreModel | null;
-	@HasMany(() => CartModel, { constraints: false })
+	@HasOne(() => CartModel, { constraints: false })
 	cart?: CartModel[] | [];
 
 	// Method to validate password

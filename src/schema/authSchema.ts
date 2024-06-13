@@ -16,12 +16,9 @@ export const registerUserSchema = z.object({
 			age: z.string({
 				required_error: "age is required",
 			}),
-			gender: z.string({
-				required_error: "gender is required",
-			}),
+			gender: z.enum(["male", "female"]),
 			verificationCode: z.string().optional(),
-			passwordResetCode: z.string().optional(),
-			// role: z.string().optional(),
+			role: z.enum(["admin", "user", "vendor"]).optional(),
 			dob: z
 				.string({
 					required_error: "gender is required",
@@ -40,6 +37,7 @@ export const registerUserSchema = z.object({
 					required_error: "Email is required",
 				})
 				.email({ message: "Invalid email address" }),
+			expirationDate: z.date().optional(),
 		})
 		.refine((data) => data.password === data.passwordConfirmation, {
 			message: "Passwords do not match",
@@ -88,7 +86,7 @@ export const forgotPasswordSchema = z.object({
 export const verifyresetPasswordSchema = z.object({
 	params: z.object({
 		id: z.string(),
-		passwordCode: z.string(),
+		verificationCode: z.string(),
 	}),
 	body: z
 		.object({
