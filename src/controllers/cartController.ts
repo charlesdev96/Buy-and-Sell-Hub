@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { createCartInputs } from "../schema";
+import { createCartInputs, removeItemInputs } from "../schema";
 import {
 	createCart,
 	checkIfCartExist,
@@ -9,6 +9,7 @@ import {
 	findUserByPk,
 	findProductById,
 	getAllProductsInCart,
+	removeProduct,
 } from "../services";
 import { StatusCodes } from "http-status-codes";
 import { log } from "../utils";
@@ -120,6 +121,59 @@ export class CartController {
 				success: false,
 				message: `Unable to get product in cart due to: ${error.message}`,
 			});
+		}
+	}
+
+	public async removeItem(req: CustomRequest, res: Response) {
+		try {
+			const { productId } = req.params as removeItemInputs;
+			const userId = req.user?.userId;
+			if (!userId) {
+				return res
+					.status(StatusCodes.UNAUTHORIZED)
+					.json({ message: "Athentication failed: Please login again" });
+			}
+			//find user
+			const user = await findUserByPk(userId);
+			if (!user) {
+				return res
+					.status(StatusCodes.NOT_FOUND)
+					.json({ message: "User not found" });
+			}
+			//check if product exist
+			const product = await findProductById(productId);
+			if (!product) {
+				return res
+					.status(StatusCodes.NOT_FOUND)
+					.json({ message: "Product not found" });
+			}
+			//check if user has a cart model already
+			const userCartExist = await checkIfCartExist(userId);
+			if (!userCartExist || !userCartExist.cartId) {
+				return res
+					.status(StatusCodes.NOT_FOUND)
+					.json({ message: "user cart not found" });
+			}
+			//remove product from cart
+			await removeProduct(productId, userCartExist.cartId);
+			res.status(StatusCodes.OK).json({
+				success: true,
+				message: "Product successfully removed from cart",
+			});
+		} catch (error: unknown) {
+			log.info(error);
+			if (error instanceof Error) {
+				res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+					success: false,
+					message: `Unable to remove item from cart due to: ${error.message}`,
+				});
+			} else {
+				res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+					success: false,
+					message:
+						"An unknown error occurred while removing item from the cart",
+				});
+			}
 		}
 	}
 }

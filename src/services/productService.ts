@@ -28,7 +28,7 @@ export const singleProduct = async (productId: string) => {
 			{
 				model: Users,
 				as: "vendor",
-				attributes: ["id", "firstName", "LastName", "role"],
+				attributes: ["id", "firstName", "lastName", "role"],
 			},
 			{
 				model: ReviewModel,

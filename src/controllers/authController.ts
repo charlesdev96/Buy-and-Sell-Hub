@@ -158,6 +158,7 @@ export class UserAuthentication {
 			}
 			user.verificationCode = null;
 			user.expirationDate = null;
+			user.verified = true;
 			await user.save();
 
 			res
@@ -199,9 +200,11 @@ export class UserAuthentication {
 			};
 
 			const token = createJWT({ payload });
-			res
-				.status(200)
-				.json({ message: "Welcome back to Buy and Sell Hub", token });
+			res.status(200).json({
+				message: `Welcome back to Buy and Sell Hub ${user.firstName} ${user.lastName}`,
+				data: user.role,
+				token,
+			});
 		} catch (error: any) {
 			log.info(error);
 			res

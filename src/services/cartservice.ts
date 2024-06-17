@@ -27,6 +27,12 @@ export const addProductToCart = async (input: CartItemAttribute) => {
 	return await CartItemModel.create(input);
 };
 
+export const removeProduct = async (productId: string, cartId: string) => {
+	return await CartItemModel.destroy({
+		where: { productId: productId, cartId: cartId },
+	});
+};
+
 export const getAllProductsInCart = async (userId: string) => {
 	return await CartModel.findOne({
 		where: { userId: userId },

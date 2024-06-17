@@ -1,12 +1,13 @@
 import * as dotenv from "dotenv";
 dotenv.config();
-import express, { Express } from "express";
+import express, { Express, Request, Response } from "express";
 import { testConnection } from "../config/connectDB";
 import { log } from "./utils";
 import RouterConfig from "./routes/routes";
 import { notFound } from "./middlewares";
 import cors from "cors";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 class AppStarter {
 	private app: Express;
@@ -20,6 +21,14 @@ class AppStarter {
 	}
 
 	private initializeMiddlewares(): void {
+		const limiter = rateLimit({
+			windowMs: 15 * 60 * 1000,
+			max: 100,
+			handler: (req: Request, res: Response) => {
+				res.status(429).json({ error: "Too many requests" });
+			},
+		});
+		this.app.use(limiter);
 		this.app.use(helmet());
 		this.app.use(cors());
 		this.app.use(express.json());

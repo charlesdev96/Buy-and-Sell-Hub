@@ -30,7 +30,7 @@ export const hashPassword = async (password: string) => {
 export const findUserByPk = async (id: string) => {
 	return await Users.findByPk(id, {
 		attributes: {
-			exclude: ["password", "verificationCode", "passwordResetCode"],
+			exclude: ["password", "verificationCode", "expirationDate"],
 		},
 	});
 };

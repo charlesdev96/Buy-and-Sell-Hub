@@ -27,7 +27,7 @@ export interface StoreAttributes {
 	products?: ProductModel[];
 	userId?: string;
 	vendor?: Users;
-	storeAddress?: storeAddress[] | null;
+	storeAddress?: storeAddress | null;
 	createdAt?: Date;
 	updatedAt?: Date;
 }
@@ -49,7 +49,7 @@ export class StoreModel
 		allowNull: true,
 		type: DataType.JSON,
 	})
-	storeAddress?: storeAddress[] | null;
+	storeAddress?: storeAddress | null;
 	@ForeignKey(() => Users)
 	@Column({ field: "userId", allowNull: true, type: DataType.UUID })
 	userId?: string;

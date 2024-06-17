@@ -10,7 +10,7 @@ export const updateUserSchema = z.object({
 			newPassword: z.string().optional(),
 			passwordConfirmation: z.string().optional(),
 			phoneNumber: z.string().optional(),
-			gender: z.string().optional(),
+			gender: z.enum(["male", "female"]).optional(),
 			age: z.string().optional(),
 			dob: z.string().optional(),
 		})
