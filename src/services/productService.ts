@@ -5,6 +5,7 @@ import {
 	ReviewModel,
 	StoreModel,
 } from "../models";
+import { Op } from "sequelize";
 
 export const createNewProduct = async (
 	input: ProductAttributes,
@@ -60,6 +61,21 @@ export const allProduct = async () => {
 	});
 };
 
+export const getProductByCategory = async (category: string) => {
+	return await ProductModel.findAll({
+		where: { category: category },
+		attributes: [
+			"productId",
+			"productName",
+			"desc",
+			"productPic",
+			"price",
+			"averageRating",
+			"category",
+		],
+	});
+};
+
 export const updateProduct = async (
 	productId: string,
 	updates: Partial<ProductAttributes>,
@@ -71,4 +87,39 @@ export const updateProduct = async (
 
 export const findProductById = async (productId: string) => {
 	return await ProductModel.findByPk(productId);
+};
+
+export const searchForProducts = async (
+	search: string,
+): Promise<ProductAttributes[]> => {
+	// Construct the search pattern for partial search
+	const searchPattern = `%${search}%`;
+	// Search for products where desc or productName contains the search string (case insensitive)
+	const products = await ProductModel.findAll({
+		attributes: [
+			"productId",
+			"productName",
+			"desc",
+			"productPic",
+			"price",
+			"averageRating",
+			"category",
+		],
+		where: {
+			[Op.or]: [
+				{
+					desc: {
+						[Op.iLike]: searchPattern, // Adjust based on your database if needed
+					},
+				},
+				{
+					productName: {
+						[Op.iLike]: searchPattern, // Adjust based on your database if needed
+					},
+				},
+			],
+		},
+	});
+	// Convert the Sequelize model instances into plain objects
+	return products.map((product) => product.get({ plain: true }));
 };

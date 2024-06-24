@@ -54,8 +54,30 @@ export const updateProductSchema = z.object({
 	}),
 });
 
+export const getProductByCategorySchema = z.object({
+	query: z.object({
+		category: z.enum(PRODUCT_CATEGORIES, {
+			required_error: "Please provide a valid product category",
+		}),
+	}),
+});
+
+export const searchProductSchema = z.object({
+	query: z.object({
+		search: z
+			.string({ required_error: "please provide a search criteria" })
+			.min(1, { message: "search should not be less than 1" }),
+	}),
+});
+
 export type createProductInput = z.infer<typeof createProductSchema>["body"];
 
 export type singleProductInputs = z.infer<typeof singleProductSchema>["params"];
 
 export type updateProductInputs = z.infer<typeof updateProductSchema>;
+
+export type getProductByCategoryInputs = z.infer<
+	typeof getProductByCategorySchema
+>["query"];
+
+export type searchProductInputs = z.infer<typeof searchProductSchema>["query"];

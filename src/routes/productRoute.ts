@@ -5,6 +5,8 @@ import {
 	createProductSchema,
 	singleProductSchema,
 	updateProductSchema,
+	getProductByCategorySchema,
+	searchProductSchema,
 } from "../schema";
 
 export class ProductRouter {
@@ -29,6 +31,20 @@ export class ProductRouter {
 			"/all-products",
 			authorizeUser,
 			this.productController.getAllProducts.bind(this.productController),
+		);
+		//get product by category
+		this.router.get(
+			"/product-by-category",
+			authorizeUser,
+			validateInputs(getProductByCategorySchema),
+			this.productController.productCategory.bind(this.productController),
+		);
+		//search product
+		this.router.get(
+			"/search-product",
+			authorizeUser,
+			validateInputs(searchProductSchema),
+			this.productController.searchProduct.bind(this.productController),
 		);
 		//get single product
 		this.router.get(

@@ -3,6 +3,8 @@ import {
 	createProductInput,
 	singleProductInputs,
 	updateProductInputs,
+	getProductByCategoryInputs,
+	searchProductInputs,
 } from "../schema";
 import {
 	createNewProduct,
@@ -11,6 +13,8 @@ import {
 	singleProduct,
 	allProduct,
 	updateProduct,
+	getProductByCategory,
+	searchForProducts,
 } from "../services";
 import { log } from "../utils";
 import { StatusCodes } from "http-status-codes";
@@ -169,6 +173,82 @@ export class ProductController {
 				message: "Unable to display all products",
 				error: error.message,
 			});
+		}
+	}
+
+	public async productCategory(req: CustomRequest, res: Response) {
+		try {
+			const { category } = req.query as getProductByCategoryInputs;
+			const userId = req.user?.userId;
+			if (!userId) {
+				return res
+					.status(StatusCodes.UNAUTHORIZED)
+					.json({ message: "Athentication failed: Please login again" });
+			}
+			const user = await findUserByPk(userId);
+			if (!user) {
+				return res
+					.status(StatusCodes.NOT_FOUND)
+					.json({ message: "User not found" });
+			}
+			const products = await getProductByCategory(category);
+			res.status(StatusCodes.OK).json({
+				success: true,
+				message: "List of products by category",
+				data: products,
+			});
+		} catch (error: unknown) {
+			log.info(error);
+			if (error instanceof Error) {
+				res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+					success: false,
+					message: `Unable to all product by category due to: ${error.message}`,
+				});
+			} else {
+				res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+					success: false,
+					message:
+						"An unknown error occurred while getting product by category",
+				});
+			}
+		}
+	}
+
+	public async searchProduct(req: CustomRequest, res: Response) {
+		try {
+			const { search } = req.query as searchProductInputs;
+			const userId = req.user?.userId;
+			if (!userId) {
+				return res
+					.status(StatusCodes.UNAUTHORIZED)
+					.json({ message: "Athentication failed: Please login again" });
+			}
+			const user = await findUserByPk(userId);
+			if (!user) {
+				return res
+					.status(StatusCodes.NOT_FOUND)
+					.json({ message: "User not found" });
+			}
+			const products = await searchForProducts(search);
+			res.status(StatusCodes.OK).json({
+				success: true,
+				message: "list of your searched courses",
+				data: products,
+			});
+		} catch (error: unknown) {
+			log.info(error);
+			if (error instanceof Error) {
+				res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+					success: false,
+					message: `Unable to all product by category due to: ${error.message}`,
+				});
+			} else {
+				res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+					success: false,
+					message:
+						"An unknown error occurred while getting product by category",
+				});
+			}
 		}
 	}
 }
