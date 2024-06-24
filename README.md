@@ -70,5 +70,5 @@ Postman link: https://planetary-resonance-291958.postman.co/workspace/My-project
 
 This will provide you with insights into how the endpoints were utilized in Postman, along with templates that you can use for reference or testing purposes.
 
-\*\* Contributing
+**Contributing**
 Contributions are welcome! If you have any ideas or improvements, please feel free to open an issue or submit a pull request.
